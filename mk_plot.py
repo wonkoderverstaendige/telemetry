@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from Stopwatch import Stopwatch
 startup = Stopwatch('Imports')
@@ -11,6 +12,10 @@ import sqlite3
 startup.event('sqlite3')
 import subprocess
 startup.event('subprocess')
+import socket
+startup.event('socket')
+from datetime import datetime
+startup.event('datetime.datetime')
 # import time
 # startup.event('time')
 # import numpy as np
@@ -21,17 +26,20 @@ startup.report()
 
 UPLOAD = True
 SENSOR_HOST = 'chuck'
+LOCAL_HOSTNAME = socket.gethostname()
 LOCAL_DB_PATH = 'db/telemetry.db'
 LOCAL_IMG_PATH = 'plot.png'
 REMOTE_IMG_PATH = '~/projects/static/'
 REMOTE_HOST = 'lychnobite.me'
+PLOT_WIDTH_PER_DAY = .8
+PLOT_HEIGHT = 5.0
 
 
 def read_df(from_id=0, **kwargs):
+    # TODO: Select only current host
     sw = kwargs['sw'] if 'sw' in kwargs else Stopwatch('Data frame loading')
 
     with sqlite3.connect(LOCAL_DB_PATH) as con:
-        # TODO: Select only current host
         df = pd.read_sql_query('SELECT * FROM telemetry WHERE id>={id};'.format(id=from_id), con)
     sw.event('SQL raw data into df')
 
@@ -67,21 +75,46 @@ def prepare_df(df, resample='5min', **kwargs):
     return df, sw
 
 
-def make_plot(df, plot_path=LOCAL_IMG_PATH, **kwargs):
+def make_plot(df, plot_path, **kwargs):
     sw = kwargs['sw'] if 'sw' in kwargs else Stopwatch('Plotting')
-    
-    p = df.plot()
+
+    # Throw all the data into a plot, temperature as a secondary scale
+    axes = df.plot(secondary_y='temp', mark_right=False, style=['red', 'black', 'blue'])
     sw.event('Plotting of the df')
 
     fig = plt.gcf()
-    fig.set_size_inches(20, 5)
-
-    elapsed = sw.elapsed()
-    p.annotate('{:.1f} s'.format(elapsed), xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -15),
-               textcoords='offset points', ha='right', va='top')
+    # Adjust plot width by number of days shown
+    delta = (df.index[-1] - df.index[0]) / pd.Timedelta('1 Day')
+    fig.set_size_inches(delta*PLOT_WIDTH_PER_DAY, PLOT_HEIGHT)
     fig.tight_layout()
-    fig.savefig(plot_path, dpi=150)
+
+    # Fiddling with axis labeling
+    # plt.xticks([])
+    axes.set_ylabel(u'Arbitrary ADC values')
+    axes.right_ax.set_ylabel(u'Temperature (°C)')
+    axes.set_yticks([])  # no labels on the arbitrary ADC range
+    axes.set_xlabel('')
+
+    # Messing with the legend, correcting order of paining (or first legend is behind axes)
+    left_legend = axes.legend(loc='upper left', shadow=True, fontsize='medium')
+    axes.right_ax.add_artist(left_legend)
+    axes.legend = None
+    axes.right_ax.legend(loc='upper right', shadow=True, fontsize='medium')
+
+    # Annotation to show date of creation and file origin
+    elapsed = sw.elapsed()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M')
+    axes.annotate('in {elapsed:.1f} s \n on {hostname}\n{timestamp}'
+                  .format(elapsed=elapsed,
+                          hostname=LOCAL_HOSTNAME,
+                          timestamp=now),
+                  xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -15),
+                  textcoords='offset points', ha='right', va='top')
+    sw.event('Plot annotation')
+
     sw.event('Saving figure')
+    fig.savefig(plot_path, transparent=False, bbox_inches='tight', pad_inches=0)
+
     plt.close()
     plt.clf()
 
@@ -113,7 +146,7 @@ if __name__ == "__main__":
     data, stopwatch = read_df(resample='5min', sw=stopwatch)
     data, stopwatch = prepare_df(data, sw=stopwatch)
 
-    make_plot(data, sw=stopwatch)
+    make_plot(data, plot_path=LOCAL_IMG_PATH, sw=stopwatch)
     upload(LOCAL_IMG_PATH, ":".join([REMOTE_HOST, REMOTE_IMG_PATH]))
 
     stopwatch.report()

@@ -1,6 +1,9 @@
 import time
 
+
 class Stopwatch(object):
+    _events = None
+
     def __init__(self, name='Generic stopwatch'):
         self._t_start = None
         self._name = name
@@ -24,12 +27,13 @@ class Stopwatch(object):
         self.start()
     
     def report(self):
-        print "Timings for {}".format(self._name)
+        print "\nTimings for {}".format(self._name)
         for n in xrange(len(self._events)):
             if n == 0:
                 continue
             this = self._events[n]
             prev = self._events[n-1]
-            print "{ts:.2f}s ({dur:.2f}s): {descr}".format(ts=this[0],
-                                                          dur=this[0]-prev[0],
-                                                          descr=this[1]) 
+            print "{ts:.2f}s ({dur:.2f}s): {descr}" \
+                .format(ts=this[0],
+                        dur=this[0]-prev[0],
+                        descr=this[1])

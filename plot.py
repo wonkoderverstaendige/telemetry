@@ -24,11 +24,12 @@ startup.event('datetime.datetime')
 # startup.event('logging')
 startup.report()
 
+INDEX_START = 0
 UPLOAD = True
 SENSOR_HOST = 'chuck'
 LOCAL_HOSTNAME = socket.gethostname()
 LOCAL_DB_PATH = 'db/telemetry.db'
-LOCAL_IMG_PATH = 'plot.png'
+LOCAL_IMG_PATH = 'var/plot.png'
 REMOTE_IMG_PATH = '~/projects/static/'
 REMOTE_HOST = 'lychnobite.me'
 PLOT_WIDTH_PER_DAY = .8
@@ -97,8 +98,8 @@ def make_plot(df, plot_path, **kwargs):
 
     # Messing with the legend, correcting order of paining (or first legend is behind axes)
     left_legend = axes.legend(loc='upper left', shadow=True, fontsize='medium')
-    axes.right_ax.add_artist(left_legend)
-    axes.legend = None
+    #axes.legend = None
+    #axes.right_ax.add_artist(left_legend)
     axes.right_ax.legend(loc='upper right', shadow=True, fontsize='medium')
 
     # Annotation to show date of creation and file origin
@@ -143,7 +144,7 @@ if __name__ == "__main__":
     sensors = get_sensors(LOCAL_DB_PATH, SENSOR_HOST)
     sensors_rev = {v: k for k, v in sensors.iteritems()}
 
-    data, stopwatch = read_df(resample='5min', sw=stopwatch)
+    data, stopwatch = read_df(INDEX_START, resample='5min', sw=stopwatch)
     data, stopwatch = prepare_df(data, sw=stopwatch)
 
     make_plot(data, plot_path=LOCAL_IMG_PATH, sw=stopwatch)

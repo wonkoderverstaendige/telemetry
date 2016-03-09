@@ -35,7 +35,7 @@ LOCAL_DB_PATH = os.path.join(PATH, 'db/telemetry.db')
 assert(os.path.exists(LOCAL_DB_PATH))
 LOCAL_IMG_PATH = os.path.join(PATH, 'var/plot.png')
 
-REMOTE_IMG_PATH = '~/projects/static/'
+REMOTE_IMG_PATH = '~/srv/www/static/'
 REMOTE_HOST = 'lychnobite.me'
 PLOT_WIDTH_PER_DAY = .8
 PLOT_HEIGHT = 5.0
@@ -110,11 +110,11 @@ def make_plot(df, plot_path, **kwargs):
     # Annotation to show date of creation and file origin
     elapsed = sw.elapsed()
     now = datetime.now().strftime('%Y-%m-%d %H:%M')
-    axes.annotate('in {elapsed:.1f} s \n on {hostname}\n{timestamp}'
+    axes.annotate('{elapsed:.1f} s on {hostname}, {timestamp}'
                   .format(elapsed=elapsed,
                           hostname=LOCAL_HOSTNAME,
                           timestamp=now),
-                  xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -15),
+                  xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -55),
                   textcoords='offset points', ha='right', va='top')
     sw.event('Plot annotation')
 

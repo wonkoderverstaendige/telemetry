@@ -6,20 +6,25 @@ import sqlite3
 import sys
 
 HOST = "chuck"
-DB = '/home/reichler/telemetry.db'
+DB = '/home/reichler/code/telemetry-chuck/db/telemetry.db'
 SER = '/dev/ttyACM0'
 WRITE_TO_DB = True
 INTERVAL = 5.000
 
 # , detect_types=sqlite3.PARSE_DECLTYPES|sqlite3.PARSE_COLNAMES
 # allows parsing of datetime into and from the database if column name is "timestamp"
-with serial.Serial(SER, 57600, timeout=10.0) as ser, \
+with serial.Serial(SER, 57600, timeout=1.0) as ser, \
      sqlite3.connect(DB, detect_types=sqlite3.PARSE_DECLTYPES) as con:
 
     cur = con.cursor()
     
     # clean up whatever Arduino has sent so far
     ser.flushInput()
+    while ser.inWaiting():
+        ser.read()
+    time.sleep(20)
+    print "Starting to ask for values... may the gods be with us!"
+
 
     # Read in sensors registered for host
     cur.execute("SELECT * FROM sensors WHERE host='{}';".format(HOST))
@@ -34,16 +39,19 @@ with serial.Serial(SER, 57600, timeout=10.0) as ser, \
     while True:
         ser.write('a')
         now = datetime.datetime.now()
-        timestamp = time.mktime(now.timetuple()) + now.microsecond*1e-6
-        time.sleep(0.25)
-        readings = []
+        time.sleep(0.5)
+        data = []
         while ser.inWaiting():
             try:
-                data = ser.readline().rstrip().split(':')
-                readings.append((timestamp, sensors[data[0]], float(data[1])))  
+                data.append(ser.readline().rstrip().split(':'))
             except KeyError, e:
                 print "Sensor not found: {}".format(e)
         
+        # deduplication
+        data_dict = {sensors[line[0]]: float(line[1]) for line in data}
+        timestamp = time.mktime(now.timetuple()) + now.microsecond*1e-6
+        readings = [(timestamp, sensor, value) for sensor, value in data_dict.iteritems()]
+
         if WRITE_TO_DB:
             try:
                 cur.executemany("""INSERT INTO telemetry(timestamp, type, value) VALUES(?, ?, ?)""", readings)
@@ -51,7 +59,7 @@ with serial.Serial(SER, 57600, timeout=10.0) as ser, \
             except sqlite3.Error, e:
                 print "Error: {}".format(e)
         
-        time.sleep(INTERVAL-0.25)
+        time.sleep(INTERVAL-0.5)
 
 if __name__ == '__main__':
     pass

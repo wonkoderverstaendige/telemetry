@@ -2,6 +2,7 @@
 db/
 var/
 plot.png
+src/web/venv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

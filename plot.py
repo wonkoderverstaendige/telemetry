@@ -4,6 +4,8 @@
 from Stopwatch import Stopwatch
 startup = Stopwatch('Imports')
 startup.start()
+import os
+startup.event('os')
 import pandas as pd
 startup.event('pandas')
 import matplotlib.pyplot as plt
@@ -24,12 +26,15 @@ startup.event('datetime.datetime')
 # startup.event('logging')
 startup.report()
 
+PATH = os.path.dirname(os.path.realpath(__file__))
 INDEX_START = 0
 UPLOAD = True
 SENSOR_HOST = 'chuck'
 LOCAL_HOSTNAME = socket.gethostname()
-LOCAL_DB_PATH = 'db/telemetry.db'
-LOCAL_IMG_PATH = 'var/plot.png'
+LOCAL_DB_PATH = os.path.join(PATH, 'db/telemetry.db')
+assert(os.path.exists(LOCAL_DB_PATH))
+LOCAL_IMG_PATH = os.path.join(PATH, 'var/plot.png')
+
 REMOTE_IMG_PATH = '~/projects/static/'
 REMOTE_HOST = 'lychnobite.me'
 PLOT_WIDTH_PER_DAY = .8

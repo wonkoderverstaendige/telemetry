@@ -1,4 +1,4 @@
-//!  AnalogSensor class.
+//!  OneWireSensor class.
 /*!
 * Sensors communicating via the Maxim OneWire bus. Will most likely only be
 * used for the DS18b20 temperature sensor. There aren't very many other useful

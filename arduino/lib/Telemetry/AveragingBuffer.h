@@ -1,6 +1,8 @@
-//
-// Created by reichler on 09/03/16.
-//
+//!  AveragingBuffer
+/*!
+* Holds data and return average over buffered data on request.
+*/
+
 #ifndef ARDUINO_AVERAGINGBUFFER_H
 #define ARDUINO_AVERAGINGBUFFER_H
 

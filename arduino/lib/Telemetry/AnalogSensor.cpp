@@ -1,8 +1,12 @@
 #include "AnalogSensor.h"
 
-AnalogSensor::AnalogSensor(const char* name, uint8_t bufsize, uint8_t interval,
-                           uint8_t a_pin, uint8_t d_pin, float scale) :
-        GenericSensor(name, bufsize, interval, scale)
+AnalogSensor::AnalogSensor(const char* name,
+                           uint8_t bufsize,
+                           uint32_t interval,
+                           uint8_t a_pin,
+                           uint8_t d_pin,
+                           float scale) :
+              GenericSensor(name, bufsize, interval, scale)
 {
     _a_pin = a_pin;
     _d_pin = d_pin;

@@ -1,6 +1,6 @@
 #include "GenericSensor.h"
 
-GenericSensor::GenericSensor(const char* name, uint8_t bufsize, uint8_t interval, float scale)
+GenericSensor::GenericSensor(const char* name, uint8_t bufsize, uint32_t interval, float scale)
 {
     _name = name;
     _scale_factor = scale;

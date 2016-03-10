@@ -1,18 +1,22 @@
 //!  AnalogSensor class.
 /*!
-* Ansynchronous handling of multiple analog sensors.
+* Analog sensors read directly from the built-in ADC.
+* Some sensors may require switching an auxiliary pin HIGH/LOW,
+* for example the soil moisture sensor. Said sensor however shouldn't
+* remain HIGH when not in use to reduce corrosion of the electrodes.
+* Hence the additional logic to toggle pins as needed.
 */
 
 #ifndef AnalogSensor_h
 #define AnalogSensor_h
 
-#include "Arduino.h"
+#include <Arduino.h>
 #include "GenericSensor.h"
 
 class AnalogSensor: public GenericSensor
 {
 public:
-    AnalogSensor(const char* type, uint8_t bufsize, uint8_t interval,
+    AnalogSensor(const char* name, uint8_t bufsize, uint32_t interval,
         uint8_t a_pin, uint8_t d_pin, float scale);
 
     ~AnalogSensor();

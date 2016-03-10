@@ -20,8 +20,8 @@ from datetime import datetime
 startup.event('datetime.datetime')
 # import time
 # startup.event('time')
-# import numpy as np
-# startup.event('numpy')
+import numpy as np
+startup.event('numpy')
 # import logging
 # startup.event('logging')
 startup.report()
@@ -74,6 +74,9 @@ def prepare_df(df, resample='5min', **kwargs):
         df = df.resample(resample, how='mean')
         sw.event('Resampling to {}'.format(resample))
 
+    df.temp[(df['light'] > 250) & (df.index < '2016-03-10 07:03:57.603722+01:00')] = np.NaN
+    sw.event("Remove false temp values.")
+
     # adjust time zone
     df = df.tz_localize('UTC').tz_convert('Europe/Amsterdam')
     sw.event('Timezone adjustment')
@@ -85,7 +88,7 @@ def make_plot(df, plot_path, **kwargs):
     sw = kwargs['sw'] if 'sw' in kwargs else Stopwatch('Plotting')
 
     # Throw all the data into a plot, temperature as a secondary scale
-    axes = df.plot(secondary_y='temp', mark_right=False, style=['red', 'black', 'blue'])
+    axes = df.plot(secondary_y=['temp', 'ds_temp'], mark_right=False, style=['r', 'g', 'b', 'c'])
     sw.event('Plotting of the df')
 
     fig = plt.gcf()
@@ -100,6 +103,10 @@ def make_plot(df, plot_path, **kwargs):
     axes.right_ax.set_ylabel(u'Temperature (°C)')
     axes.set_yticks([])  # no labels on the arbitrary ADC range
     axes.set_xlabel('')
+
+    # limits
+    axes.set_ylim((0, 1023))
+    axes.right_ax.set_ylim((10, 40))
 
     # Messing with the legend, correcting order of paining (or first legend is behind axes)
     left_legend = axes.legend(loc='upper left', shadow=True, fontsize='medium')

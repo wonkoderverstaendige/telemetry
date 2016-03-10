@@ -22,7 +22,7 @@ with serial.Serial(SER, 57600, timeout=1.0) as ser, \
     ser.flushInput()
     while ser.inWaiting():
         ser.read()
-    time.sleep(20)
+    time.sleep(10)
     print "Starting to ask for values... may the gods be with us!"
 
 
@@ -48,7 +48,7 @@ with serial.Serial(SER, 57600, timeout=1.0) as ser, \
                 print "Sensor not found: {}".format(e)
         
         # deduplication
-        data_dict = {sensors[line[0]]: float(line[1]) for line in data}
+        data_dict = {sensors[line[0].lstrip()]: float(line[1]) for line in data}
         timestamp = time.mktime(now.timetuple()) + now.microsecond*1e-6
         readings = [(timestamp, sensor, value) for sensor, value in data_dict.iteritems()]
 

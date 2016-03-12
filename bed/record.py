@@ -12,7 +12,7 @@ def timestamp():
     return time.mktime(ts.timetuple())+(ts.microsecond/1e6)
 
 bufsize = 1 if DEBUG else -1
-with open('rec.csv', 'wa', bufsize) as f:
+with open('db/rec.csv', 'wa', bufsize) as f:
     writer = csv.writer(f)
     with serial.Serial('/dev/ttyACM0', 57600, timeout=1.0) as ser:
         # Empty whatever is in the buffer

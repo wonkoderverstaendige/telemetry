@@ -3,37 +3,28 @@
 # test reading sensors table
 
 import sqlite3
+import argparse
 
-HOST = "chuck"
-DB = '/home/reichler/telemetry.db'
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Check sensors in database of a node")
+    parser.add_argument('db', help='Path to sqlite3 database file')
+    parser.add_argument('-n', '--node', help='Node name', default=None)
+    args = parser.parse_args()
 
-with sqlite3.connect(DB, detect_types=sqlite3.PARSE_DECLTYPES) as con:
-    cur = con.cursor()
-    
-    
-    # read in ALL the sensor types
-    try:
-        cur.execute("SELECT * FROM sensors;")
-        sensors = cur.fetchall()
-        sdict = {s[2]: s[0] for s in sensors}
+    with sqlite3.connect(args.db, detect_types=sqlite3.PARSE_DECLTYPES) as con:
+        cur = con.cursor()
 
-        print "\nSensors registered in {} for ANY host:\n".format(DB)
-        print "type \t Id"
-        print "-------------"
-        for k, v in sdict.iteritems():
-            print k,'\t ', v
-    except sqlite3.Error, e:
-        print "Error: {}".format(e)
-    
-    # read in the sensor types for HOST
-    try:
-        cur.execute("SELECT * FROM sensors WHERE host='{}';".format(HOST))
-        sensors = cur.fetchall()
-        sdict = {s[2]: s[0] for s in sensors}
-        print "\nSensors registered in {} for host '{}':\n".format(DB, HOST)
-        print "type \t Id"
-        print "-------------"
-        for k, v in sdict.iteritems():
-            print k,'\t ', v
-    except sqlite3.Error, e:
-        print "Error: {}".format(e)
+        # read in ALL the sensor types
+        try:
+            query = "SELECT * FROM sensors"
+            if args.node:
+                query + "WHERE host='{}'".format(args.node)
+            cur.execute(query)
+            sensors = {s[0]: s[2] for s in cur.fetchall()}
+
+            print "Id\ttype"
+            print "-------------"
+            for k, v in sensors.iteritems():
+                print '{}\t{}'.format(k, v)
+        except sqlite3.Error, e:
+            print "Error: {}".format(e)

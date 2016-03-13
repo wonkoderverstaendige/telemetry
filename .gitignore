@@ -2,6 +2,7 @@
 db/
 /web/venv
 /local
+localhost.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

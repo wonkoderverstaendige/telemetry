@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from Stopwatch import Stopwatch
+from util.Stopwatch import Stopwatch
 startup = Stopwatch('Imports')
 startup.start()
 import os

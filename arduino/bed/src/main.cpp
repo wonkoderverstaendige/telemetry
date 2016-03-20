@@ -1,5 +1,5 @@
-#include "Arduino.h"
-#include "OneWire.h"
+#include <Arduino.h>
+#include <OneWire.h>
 #include "OneWireSensor.h"
 #include "AnalogSensor.h"
 
@@ -8,25 +8,18 @@
 #define STRAIN_ADC A5
 
 OneWire ow_bus(ONE_WIRE_BUS);
-OneWireSensor DS_temp("temp", &ow_bus, 5, 2000, 1.0f/16);  // DS18b20
-AnalogSensor AS_strain("strain", 10, 100, STRAIN_ADC, NO_DIGITAL, 1.0f);
+OneWireSensor DS_temp("temp", &ow_bus, 10, 6000, 60000);  // DS18b20
 
-bool sendRequested = false;
+AnalogSensor AS_strain("strain", 10, 500, 5000, STRAIN_ADC, NO_DIGITAL);
 
 unsigned long currentMillis;
 void setup() {
+  DS_temp.setScaleFactor(1.0f/16);
   Serial.begin(57600);
 }
 
 void loop() {
   currentMillis = millis();
-  AS_strain.tick(currentMillis, sendRequested);
-  DS_temp.tick(currentMillis, sendRequested);
-  if (sendRequested) sendRequested = false;
-}
-
-
-void serialEvent() {
-  while (Serial.available()) Serial.read();
-  sendRequested = true;
+  AS_strain.tick(currentMillis);
+  DS_temp.tick(currentMillis);
 }

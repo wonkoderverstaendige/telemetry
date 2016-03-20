@@ -30,7 +30,7 @@ void GenericSensor::tick(unsigned long timestamp)
   }
 
   if (timestamp >= _next_send) {
-    send();
+    if (timestamp > 0) send();
     _next_send = timestamp + _interval_sending;
   }
 }

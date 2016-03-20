@@ -23,6 +23,7 @@ public:
 
   uint16_t readSensor();
   void printCRC();
+  void printAddr();
 
 protected:
   OneWire* _wire;    ///< The actual OneWire bus to talk over

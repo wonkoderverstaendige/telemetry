@@ -11,13 +11,10 @@ OneWireSensor::OneWireSensor(const char* name,
 
   // start looking for our device, store its address
   wire->search(_addr);
-  Serial.print("ROM: ");
-  for (uint8_t i=0; i< 8; i++) {
-    Serial.print(_addr[i], HEX);
-    Serial.print(" ");
-  }
+  // OneWire::printAddr();
+
   if (OneWire::crc8(_addr, 7) != _addr[7]) {
-    Serial.println("CRC not valid!");
+    //Serial.println("CRC not valid!");
   }
 }
 
@@ -44,4 +41,12 @@ void OneWireSensor::printCRC()
 {
   Serial.print("\n CRC: ");
   Serial.println(OneWire::crc8(_data, 8), HEX);
+}
+
+void OneWireSensor::printAddr()
+{
+  for (uint8_t i=0; i< 8; i++) {
+    Serial.print(_addr[i], HEX);
+    Serial.print(" ");
+  }
 }

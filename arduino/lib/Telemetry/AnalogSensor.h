@@ -16,8 +16,8 @@
 class AnalogSensor: public GenericSensor
 {
 public:
-    AnalogSensor(const char* name, uint8_t bufsize, uint32_t interval,
-        uint8_t a_pin, uint8_t d_pin, float scale);
+    AnalogSensor(const char*, uint8_t, uint32_t, uint32_t,
+        uint8_t a_pin, uint8_t d_pin);
 
     ~AnalogSensor();
 

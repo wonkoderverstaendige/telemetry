@@ -3,9 +3,9 @@
 OneWireSensor::OneWireSensor(const char* name,
                              OneWire* wire,
                              uint8_t bufsize,
-                             uint32_t interval,
-                             float scale) :
-               GenericSensor(name, bufsize, interval, scale)
+                             uint32_t sample_interval,
+                             uint32_t send_interval) :
+               GenericSensor(name, bufsize, sample_interval, send_interval)
 {
   _wire = wire;
 

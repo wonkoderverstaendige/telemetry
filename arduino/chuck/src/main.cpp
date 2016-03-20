@@ -17,13 +17,13 @@ AnalogSensor AS_light("light", 10, 1000, LIGHT_ADC, NO_DIGITAL, 1.0f);  // LDR
 OneWire ow_bus(ONE_WIRE_BUS);
 OneWireSensor DS_temp("ds_temp", &ow_bus, 5, 2000, 1.0f/16);  // DS18b20
 
+unsigned long currentMillis;
 bool sendRequested = false;
 
 void setup() {
   Serial.begin(57600);
 }
 
-unsigned long currentMillis = millis();
 void loop() {
     currentMillis = millis();
 

@@ -1,37 +1,38 @@
 #include "GenericSensor.h"
 
-GenericSensor::GenericSensor(const char* name, uint8_t bufsize, uint32_t interval, float scale)
+GenericSensor::GenericSensor(const char* name,
+                             uint8_t bufsize,
+                             uint32_t sample_interval,
+                             uint32_t send_interval)
 {
     _name = name;
-    _scale_factor = scale;
-    _interval = interval;
-    _last_ts = 0;
+    _interval_sampling = sample_interval;
+    _interval_sending = send_interval;
+
+    _scale_factor = 1.0;
+    _scale_offset = 0;
+
+    _next_sample = 0;
+    _next_send = 0;
+
     _buffer = AveragingBuffer();
     _buffer.setSize(bufsize);
 }
 
 GenericSensor::~GenericSensor() {};
 
-void GenericSensor::tick(unsigned long timestamp, bool sendRequested)
+void GenericSensor::tick(unsigned long timestamp)
 {
-    // TODO: Take care of overflow for millis every 50 days or so
-    if (timestamp-_last_ts >= _interval) {
-        uint16_t val = readSensor();
-        addValue(val);
-        _last_ts = timestamp;
-    }
+  // TODO: Take care of overflow for millis every 50 days or so
+  if (timestamp >= _interval_sampling) {
+    addValue(readSensor());
+    _next_sample = timestamp + _interval_sampling;
+  }
 
-    if (sendRequested) send();
-}
-
-void GenericSensor::addValue(uint16_t val)
-{
-    _buffer.addValue(val);
-}
-
-float GenericSensor::getAverage()
-{
-    return _buffer.getAverage() * _scale_factor;
+  if (timestamp >= _next_send) {
+    send();
+    _next_send = timestamp + _interval_sending;
+  }
 }
 
 void GenericSensor::send()

@@ -9,15 +9,15 @@
 #ifndef OneWireSensor_h
 #define OneWireSensor_h
 
-#include "Arduino.h"
-#include "OneWire.h"
+#include <Arduino.h>
+#include <OneWire.h>
 #include "GenericSensor.h"
 
 class OneWireSensor: public GenericSensor
 {
 public:
   OneWireSensor(const char* name, OneWire* wire, uint8_t bufsize,
-                uint32_t interval, float scale);
+                uint32_t, uint32_t);
 
   ~OneWireSensor();
 

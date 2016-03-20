@@ -6,7 +6,7 @@
 #ifndef ARDUINO_AVERAGINGBUFFER_H
 #define ARDUINO_AVERAGINGBUFFER_H
 
-#include "Arduino.h"
+#include <Arduino.h>
 
 class AveragingBuffer
 {

@@ -2,11 +2,11 @@
 
 AnalogSensor::AnalogSensor(const char* name,
                            uint8_t bufsize,
-                           uint32_t interval,
+                           uint32_t sample_interval,
+                           uint32_t send_interval,
                            uint8_t a_pin,
-                           uint8_t d_pin,
-                           float scale) :
-              GenericSensor(name, bufsize, interval, scale)
+                           uint8_t d_pin) :
+              GenericSensor(name, bufsize, sample_interval, send_interval)
 {
     _a_pin = a_pin;
     _d_pin = d_pin;

@@ -7,10 +7,13 @@
 #define ONE_WIRE_BUS 8
 #define STRAIN_ADC A5
 
-OneWire ow_bus(ONE_WIRE_BUS);
-OneWireSensor DS_temp("temp", &ow_bus, 10, 6000, 60000);  // DS18b20
+#define SECOND 1000
+#define MINUTE 60*1000l
 
-AnalogSensor AS_strain("strain", 10, 500, 5000, STRAIN_ADC, NO_DIGITAL);
+OneWire ow_bus(ONE_WIRE_BUS);
+OneWireSensor DS_temp("temp", &ow_bus, 10, 6*SECOND, 1*MINUTE);  // DS18b20
+
+AnalogSensor AS_strain("strain", 20, 500, 10*SECOND, STRAIN_ADC, NO_DIGITAL);
 
 unsigned long currentMillis;
 void setup() {

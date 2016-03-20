@@ -3,8 +3,8 @@
 OneWireSensor::OneWireSensor(const char* name,
                              OneWire* wire,
                              uint8_t bufsize,
-                             uint32_t sample_interval,
-                             uint32_t send_interval) :
+                             unsigned long sample_interval,
+                             unsigned long send_interval) :
                GenericSensor(name, bufsize, sample_interval, send_interval)
 {
   _wire = wire;

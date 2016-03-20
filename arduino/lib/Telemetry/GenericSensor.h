@@ -12,7 +12,7 @@
 class GenericSensor
 {
 public:
-    GenericSensor(const char*, uint8_t, uint32_t, uint32_t);
+    GenericSensor(const char*, uint8_t, unsigned long, unsigned long);
     ~GenericSensor();
 
     /**
@@ -78,8 +78,8 @@ protected:
     const char * _name;         ///< Name of this sensor/type (e.g. temp, for temperature)
     float _scale_factor;        ///< Scale factor to use when returning average
     int _scale_offset;          ///< Scale offset to use when returning average
-    uint32_t _interval_sampling;///< Interval to trigger sensor reading
-    uint32_t _interval_sending; ///< Interval to trigger average transmission
+    unsigned long _interval_sampling;///< Interval to trigger sensor reading
+    unsigned long _interval_sending; ///< Interval to trigger average transmission
     unsigned long _next_sample; ///< Timestamp of next sample to take
     unsigned long _next_send;   ///< Timestamp of next average to transmit
 };

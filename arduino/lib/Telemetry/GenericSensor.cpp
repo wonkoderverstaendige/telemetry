@@ -2,8 +2,8 @@
 
 GenericSensor::GenericSensor(const char* name,
                              uint8_t bufsize,
-                             uint32_t sample_interval,
-                             uint32_t send_interval)
+                             unsigned long sample_interval,
+                             unsigned long send_interval)
 {
     _name = name;
     _interval_sampling = sample_interval;

@@ -17,7 +17,7 @@ class OneWireSensor: public GenericSensor
 {
 public:
   OneWireSensor(const char* name, OneWire* wire, uint8_t bufsize,
-                uint32_t, uint32_t);
+                unsigned long, unsigned long);
 
   ~OneWireSensor();
 

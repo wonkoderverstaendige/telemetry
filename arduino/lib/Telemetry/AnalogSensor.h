@@ -16,7 +16,7 @@
 class AnalogSensor: public GenericSensor
 {
 public:
-    AnalogSensor(const char*, uint8_t, uint32_t, uint32_t,
+    AnalogSensor(const char*, uint8_t, unsigned long, unsigned long,
                  uint8_t a_pin, uint8_t d_pin);
 
     ~AnalogSensor();

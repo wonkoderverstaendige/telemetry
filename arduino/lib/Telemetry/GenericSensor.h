@@ -26,7 +26,7 @@ public:
      * Perform sensor conversion, whatever that may entail.
      */
     virtual uint16_t readSensor() { return 0; };
-    
+
     /**
      * Placeholder for analog sensor. Me stoopid.
      */
@@ -64,12 +64,12 @@ public:
      *
      * @return signed int offset to use for scaling the buffered average
      */
-    int getScaleFactor() { return _scale_offset; }
+    int getScaleFactor() { return _scale_factor; }
 
     /**
      * Return currently set scaling offset
      */
-    void setScaleFactor(int offset) { _scale_offset = offset; }
+    void setScaleFactor(int factor) { _scale_factor = factor; }
 
     /**
      * Return the name/type of the sensor

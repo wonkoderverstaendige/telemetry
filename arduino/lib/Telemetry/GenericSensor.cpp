@@ -39,5 +39,5 @@ void GenericSensor::send()
 {
     Serial.print(_name);
     Serial.print(':');
-    Serial.println(getAverage());
+    Serial.println((getAverage()+_scale_offset)*_scale_factor);
 }

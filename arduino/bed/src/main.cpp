@@ -20,7 +20,7 @@ OneWireSensor OW_temp("temp", &ow_bus, 10, 6*SECOND, 1*MINUTE);
 // 2: PIR with digital output
 DigitalSensor DS_motion("motion", MOTION_DIG, 1, 0, 0);
 
-GenericSensor* sensors[NUM_SENSORS] = {&OW_temp, &AS_strain, &DS_motion};
+GenericSensor* sensors[NUM_SENSORS] = {&AS_strain, &OW_temp, &DS_motion};
 
 volatile bool motion_change = false;
 void motion() {

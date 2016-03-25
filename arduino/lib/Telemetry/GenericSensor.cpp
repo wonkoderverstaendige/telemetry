@@ -10,7 +10,7 @@ GenericSensor::GenericSensor(const char* name,
     _interval_sending = send_interval;
 
     _scale_factor = 1.0;
-    _scale_offset = 0;
+    _scale_offset = 0.0;
 
     _next_sample = 0;
     _next_send = 0;
@@ -35,9 +35,13 @@ void GenericSensor::tick(unsigned long timestamp)
   }
 }
 
+float GenericSensor::getAverage() {
+  return (_buffer.getAverage() + _scale_offset) * _scale_factor;
+}
+
 void GenericSensor::send()
 {
     Serial.print(_name);
     Serial.print(':');
-    Serial.println((getAverage()+_scale_offset)*_scale_factor);
+    Serial.println(getAverage());
 }

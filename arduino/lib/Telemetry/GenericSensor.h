@@ -45,31 +45,31 @@ public:
     /**
      * Calculate average of values in buffer.
      */
-    float getAverage() { return _buffer.getAverage() * _scale_factor + _scale_offset; };
+    float getAverage();
 
     /**
      * Return currently set scaling offset
      *
      * @return signed int offset to use for scaling the buffered average
      */
-    int getOffset() { return _scale_offset; }
+    float getOffset() { return _scale_offset; }
 
     /**
      * Return currently set scaling offset
      */
-    void setOffset(int offset) { _scale_offset = offset; }
+    void setOffset(float offset) { _scale_offset = offset; }
 
     /**
      * Return currently set scaling offset
      *
      * @return signed int offset to use for scaling the buffered average
      */
-    int getScaleFactor() { return _scale_factor; }
+    float getScaleFactor() { return _scale_factor; }
 
     /**
      * Return currently set scaling offset
      */
-    void setScaleFactor(int factor) { _scale_factor = factor; }
+    void setScaleFactor(float factor) { _scale_factor = factor; }
 
     /**
      * Return the name/type of the sensor
@@ -82,7 +82,7 @@ protected:
     AveragingBuffer _buffer;    ///< value buffer, returns average when queried
     const char * _name;         ///< Name of this sensor/type (e.g. temp, for temperature)
     float _scale_factor;        ///< Scale factor to use when returning average
-    int _scale_offset;          ///< Scale offset to use when returning average
+    float _scale_offset;          ///< Scale offset to use when returning average
     unsigned long _interval_sampling;///< Interval to trigger sensor reading
     unsigned long _interval_sending; ///< Interval to trigger average transmission
     unsigned long _next_sample; ///< Timestamp of next sample to take

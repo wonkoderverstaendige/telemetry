@@ -22,8 +22,9 @@ DigitalSensor DS_motion("motion", MOTION_DIG, 1, 0, 0);
 
 GenericSensor* sensors[NUM_SENSORS] = {&OW_temp, &AS_strain, &DS_motion};
 
+volatile bool motion_change = false;
 void motion() {
-  sensors[2]->tick(millis());
+  motion_change = true;
 }
 
 void setup() {
@@ -37,4 +38,8 @@ void loop() {
   // ping ALL the sensors to have 'em do their thing
   // NOTE: Skipping last sensor, we call that one via interrupt
   for (byte i=0; i<NUM_SENSORS-1; i++) sensors[i]->tick(millis());
+  if (motion_change) {
+    sensors[2]->tick(millis());
+    motion_change = false;
+  }
 }

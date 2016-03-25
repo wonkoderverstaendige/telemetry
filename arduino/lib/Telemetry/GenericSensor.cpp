@@ -24,7 +24,7 @@ GenericSensor::~GenericSensor() {};
 void GenericSensor::tick(unsigned long timestamp)
 {
   // TODO: Take care of overflow for millis every 50 days or so
-  if (timestamp >= _interval_sampling) {
+  if (timestamp >= _next_sample) {
     addValue(readSensor());
     _next_sample = timestamp + _interval_sampling;
   }

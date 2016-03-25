@@ -14,7 +14,7 @@
 class DigitalSensor: public GenericSensor
 {
 public:
-    DigitalSensor(const char*, uint8_t, unsigned long, unsigned long, uint8_t);
+    DigitalSensor(const char*, uint8_t, uint8_t, unsigned long, unsigned long);
 
     ~DigitalSensor();
 

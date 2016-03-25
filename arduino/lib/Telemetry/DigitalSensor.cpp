@@ -1,10 +1,10 @@
 #include "DigitalSensor.h"
 
 DigitalSensor::DigitalSensor(const char* name,
+                            uint8_t dig_pin,
                             uint8_t bufsize,
                             unsigned long sample_interval,
-                            unsigned long send_interval,
-                            uint8_t dig_pin) :
+                            unsigned long send_interval) :
               GenericSensor(name, bufsize, sample_interval, send_interval)
 {
   _aux_pin = 0;

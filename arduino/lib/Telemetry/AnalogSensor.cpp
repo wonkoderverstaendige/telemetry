@@ -1,10 +1,10 @@
 #include "AnalogSensor.h"
 
 AnalogSensor::AnalogSensor(const char* name,
+                           uint8_t adc_pin,
                            uint8_t bufsize,
                            unsigned long sample_interval,
-                           unsigned long send_interval,
-                           uint8_t adc_pin) :
+                           unsigned long send_interval) :
               GenericSensor(name, bufsize, sample_interval, send_interval)
 {
   _aux_pin = 0;

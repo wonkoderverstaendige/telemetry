@@ -14,20 +14,31 @@
 class DigitalSensor: public GenericSensor
 {
 public:
-    DigitalSensor(const char*, uint8_t, uint8_t, unsigned long, unsigned long);
+  DigitalSensor(const char*, uint8_t, uint8_t, unsigned long, unsigned long);
 
-    ~DigitalSensor();
+  ~DigitalSensor();
 
-    uint16_t readSensor();
+  uint16_t readSensor();
 
-    /**
-     * Add an auxiliary pin. This pin is toggled before/after reading state.
-     */
-    void auxPin(uint8_t);
+  /**
+   * Add an auxiliary pin. This pin is toggled before/after reading state.
+   */
+  void auxPin(uint8_t);
+
+  /**
+   * Return current inversion flag state.
+   */
+  bool getInversion() { return _invert; };
+
+  /**
+   * Set inversion flag.
+   */
+  void setInversion(bool invert) { _invert = invert; };
 
 protected:
-    uint8_t _aux_pin;    ///< Auxiliary pin, e.g. toggling external actuators
-    uint8_t _dig_pin;    ///< Digital pin to read
+  uint8_t _aux_pin;    ///< Auxiliary pin, e.g. toggling external actuators
+  uint8_t _dig_pin;    ///< Digital pin to read
+  bool _invert;        ///< invert digital sensor reading (pull up)
 };
 
 #endif

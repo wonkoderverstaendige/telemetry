@@ -8,8 +8,9 @@ DigitalSensor::DigitalSensor(const char* name,
               GenericSensor(name, bufsize, sample_interval, send_interval)
 {
   _aux_pin = 0;
+  _invert = true;
   _dig_pin = dig_pin;
-  pinMode(_dig_pin, INPUT_PULLUP);
+  pinMode(_dig_pin, INPUT);
 }
 
 DigitalSensor::~DigitalSensor() { }
@@ -20,7 +21,7 @@ uint16_t DigitalSensor::readSensor()
   uint16_t state = digitalRead(_dig_pin);
   if (_dig_pin != 0) digitalWrite(_dig_pin, LOW);
 
-  return state;
+  return (_invert ? !state : state);
 }
 
 void DigitalSensor::auxPin(uint8_t aux_pin) {

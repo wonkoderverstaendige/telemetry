@@ -16,16 +16,21 @@
 class AnalogSensor: public GenericSensor
 {
 public:
-    AnalogSensor(const char*, uint8_t, unsigned long, unsigned long,
-                 uint8_t a_pin, uint8_t d_pin);
+    AnalogSensor(const char*, uint8_t, unsigned long, unsigned long, uint8_t);
 
     ~AnalogSensor();
 
-    uint16_t readSensor();
+    virtual uint16_t readSensor();
+
+    /**
+     * Add an auxiliary pin. This pin is toggled before/after
+     * each ADC conversion.
+     */
+    void auxPin(uint8_t);
 
 protected:
-    uint8_t _a_pin;    ///< Analog pin to read from
-    uint8_t _d_pin;    ///< Digital pin for sensors requiring additional actions
+    uint8_t _adc_pin;    ///< Analog pin to read from
+    uint8_t _aux_pin;    ///< Digital pin for sensors requiring additional actions
 };
 
 #endif

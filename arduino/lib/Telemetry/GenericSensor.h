@@ -26,6 +26,11 @@ public:
      * Perform sensor conversion, whatever that may entail.
      */
     virtual uint16_t readSensor() { return 0; };
+    
+    /**
+     * Placeholder for analog sensor. Me stoopid.
+     */
+    virtual void auxPin(uint8_t) {};
 
     /**
      * Add new value to the buffer.

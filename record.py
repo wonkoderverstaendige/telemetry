@@ -31,15 +31,15 @@ def clear_serial(ser):
 def loop(writer, ser):
     while True:
         try:
-            line = ser.readline()
-            sensor, value = line.rstrip().split(':')
+            sensor, value = ser.readline().rstrip().split(':')
             value = float(value)
         except (KeyError, ValueError), error:
             pass
             # print error
         else:
             row = [timestamp(), sensor, '{:.2f}'.format(value)]
-            print row
+            if DEBUG:
+                print row
             writer.writerow(row)
 
 
@@ -51,7 +51,7 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--timeout', help='Serial baud rate', default=10.0)
     cli_args = parser.parse_args()
 
-    assert os.path.exists(SERIAL_PATH)
+    assert os.path.exists(cli_args.port)
     assert os.path.exists(LOCAL_DB_PATH)
 
     buffer_size = 1 if DEBUG else 4*2**10

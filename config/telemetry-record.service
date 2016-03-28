@@ -2,7 +2,7 @@
 Description=Recording serial data to local db file (csv, sqlite, hdf...)
 
 [Service]
-ExecStart=/home/reichler/code/telemetry/record.py -p /dev/ttyACM0 -b 56700
+ExecStart=/home/reichler/code/telemetry/record.py -p /dev/ttyACM0 -b 57600
 
 [Install]
 WantedBy = multi-user.target

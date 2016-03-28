@@ -4,6 +4,7 @@ import os
 import subprocess
 import ConfigParser
 import time
+import socket
 from datetime import datetime as dt
 
 
@@ -41,6 +42,11 @@ def get_local_config():
     # make the relative paths into a universally useful absolute paths
     for name, path in cfg_dict['paths'].items():
         cfg_dict['paths'][name] = os.path.abspath(os.path.join(this_file, path))
+    try:
+        assert cfg_dict['host']['name'] == socket.gethostname()
+    except AssertionError:
+        raise SystemExit("Hostname in config/localhost.ini ({}) does not match machine hostname ({})."
+                         "\nHas this host been configured properly?".format(cfg_dict['host']['name'], socket.gethostname()))
     return cfg_dict
 
 

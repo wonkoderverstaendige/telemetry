@@ -15,7 +15,6 @@ def csv_table2df(csv_file):
     df.type.loc[df.type == 'temp'] = 8
     df.type.astype('uint8')
     return df
-    # df.index = pd.to_datetime(df.index, unit='s').tz_localize('UTC').tz_convert('Europe/Amsterdam')
 
 
 def sql_table2df(sql_con, table, start=0, end=None, **kwargs):

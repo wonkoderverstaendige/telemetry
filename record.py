@@ -56,7 +56,7 @@ def record_loop(db_path, serial_port, debug=False):
                                             dt.fromtimestamp(int(row['timestamp'])).strftime("%Y-%m-%d %H:%M"),
                                             row['sensor_str'],
                                             row['value'])
-                            csv_writer.writerow(row)
+                        csv_writer.writerow(row)
 
 if __name__ == "__main__":
     import argparse

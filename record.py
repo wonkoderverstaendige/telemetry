@@ -17,8 +17,8 @@ LOCAL_DB_PATH = LOCAL_CONFIG['paths']['db']
 FIELDNAMES = ['timestamp', 'sensor_str', 'value']
 
 
-def record_loop(db_path, serial_port, debug=False):
-    buffer_size = 1 if debug else 4*2**10
+def record_loop(db_path, serial_port, args):
+    buffer_size = 1 if args.unbuffered else 512
     while True:
         csv_name = "{year}_w{week:02}-{hostname}.csv"\
             .format(hostname=SENSOR_HOST,
@@ -26,7 +26,7 @@ def record_loop(db_path, serial_port, debug=False):
                     week=iso_week())
         csv_path = os.path.join(db_path, csv_name)
         current_week = iso_week()
-        print "Recording to ", csv_path
+        print "Recording to ", csv_path, "with buffer size", buffer_size, "B"
 
         with open(csv_path, 'a', buffer_size) as f:
             csv_writer = csv.DictWriter(f, fieldnames=FIELDNAMES)
@@ -48,10 +48,10 @@ def record_loop(db_path, serial_port, debug=False):
                                'sensor_str': sensor,
                                'value': '{:.2f}'.format(float(value))}
                     except ValueError as error:
-                        if debug:
+                        if args.debug:
                             print error
                     else:
-                        if debug:
+                        if args.debug:
                             print '{0} | {1: <8} | {2}'.format(
                                             dt.fromtimestamp(int(row['timestamp'])).strftime("%Y-%m-%d %H:%M"),
                                             row['sensor_str'],
@@ -66,6 +66,8 @@ if __name__ == "__main__":
     parser.add_argument('-r', '--timeout', help='Serial baud rate', default=120.0)
     parser.add_argument('--debug', action='store_true',
                         help='Enable debugging. Immediate writes to file.', default=DEBUG)
+    parser.add_argument('--unbuffered', action='store_true',
+                        help='Disable output file buffering for immediate writing to disk', default=False)
     cli_args = parser.parse_args()
 
     assert os.path.exists(LOCAL_DB_PATH)
@@ -74,4 +76,4 @@ if __name__ == "__main__":
 
     with serial.Serial(cli_args.port, cli_args.baud, timeout=cli_args.timeout) as ser:
         ser.flushInput()
-        record_loop(LOCAL_DB_PATH, ser, cli_args.debug)
+        record_loop(LOCAL_DB_PATH, ser, cli_args)

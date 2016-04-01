@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import os
 import numpy as np
 import pandas as pd
@@ -51,11 +53,13 @@ def last_samples_hdf(df):
 
 
 if __name__ == "__main__":
-    os.system("rsync -avh VersedSquid:~/code/telemetry/local/db/2016_w13-chuck.csv ./local/db/")
-    os.system("rsync -avh RandyDolphin:~/code/telemetry/local/db/2016_w13-bed.csv ./local/db/")
+    print LOCAL_DB_PATH
+    os.system("rsync -avh VersedSquid:~/code/telemetry/local/db/2016_w13-chuck.csv {}".format(LOCAL_DB_PATH))
+    os.system("rsync -avh RandyDolphin:~/code/telemetry/local/db/2016_w13-bed.csv {}".format(LOCAL_DB_PATH))
 
-    last = last_samples_hdf(load_hdf('./local/db/test.h5'))
-    node_data = [load_node_csv('./local/db/2016_w13-chuck.csv'), load_node_csv('./local/db/2016_w13-bed.csv')]
+    last = last_samples_hdf(load_hdf(os.path.join(LOCAL_DB_PATH, 'telemetry.h5')))
+    node_data = [load_node_csv(os.path.join(LOCAL_DB_PATH, '2016_w13-chuck.csv')),
+                 load_node_csv(os.path.join(LOCAL_DB_PATH, '2016_w13-bed.csv'))]
     df = pd.concat([node_data[n][node_data[n].index > last[n]] for n in range(len(node_data))]).sort_index()
 
     # FIXME: For some reason the values column is _sometimes_ cast to float64! The hell?
@@ -64,7 +68,7 @@ if __name__ == "__main__":
     try:
         if df.shape[0]:
             print df.shape[0], "new rows to be appended!"
-            with pd.HDFStore('./local/db/test.h5') as store:
+            with pd.HDFStore(os.path.join(LOCAL_DB_PATH, 'telemetry.h5')) as store:
                 store.append('data', df, append=True)
         else:
             print "Nothing new."

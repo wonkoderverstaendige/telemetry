@@ -1,123 +1,134 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import matplotlib
+matplotlib.use('Agg')
 
-from util.Stopwatch import Stopwatch
-# startup = Stopwatch('Imports')
-# startup.start()
 import argparse
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import socket
-import numpy as np
-from util import db_io
-from util.misc import get_local_config
-import sqlite3
-# startup.report()
+import matplotlib.lines as mpl_lines
+from util.misc import get_local_config, upload_scp
 
 LOCAL_CONFIG = get_local_config()
 SENSOR_HOST = LOCAL_CONFIG['host']['node']
-
-LOCAL_HOST_NAME = socket.gethostname()
+LOCAL_HOST_NAME = LOCAL_CONFIG['host']['name']
 LOCAL_NODE_NAME = LOCAL_CONFIG['host']['node']
-assert LOCAL_HOST_NAME == LOCAL_CONFIG['host']['name']
 
 LOCAL_DB_PATH = LOCAL_CONFIG['paths']['db']
-
+assert(os.path.exists(LOCAL_CONFIG['paths']['db']))
 LOCAL_VAR_PATH = LOCAL_CONFIG['paths']['var']
 assert(os.path.exists(LOCAL_VAR_PATH)), LOCAL_VAR_PATH
 
-REMOTE_VAR_PATH = '~/srv/www/static/'
+PLOT_WIDTH_PER_DAY = 1.5
+PLOT_HEIGHT = 8
+
+RESAMPLE = '6min'
+
+REMOTE_VAR_PATH = '~/srv/www/static/plot.png'
 REMOTE_HOST = 'lychnobite.me'
 
-INDEX_START = 0
-PLOT_WIDTH_PER_DAY = .8
-PLOT_HEIGHT = 9.0
+CHUCK = 0
+BED = 1
+nodes = {'chuck': CHUCK, 'bed': BED}
+sensors = {0: {'temp': 1, 'light': 2, 'soil': 3, 'dummy': 4, 'ds_temp':5},
+           1: {'strain': 6, 'temp': 7, 'motion': 8}}
+# needed because of the naming overlap in the sensors. [b/c]x are placeholders for debugging.
+cats = {0: ['c0', 'temp', 'light', 'soil', 'c4', 'ds_temp', 'c6',  'c7'],
+        1: ['b0', 'b1', 'b2', 'b3', 'b4', 'b5', 'strain',  'temp',  'motion']}
 
 
-def make_plot(df, plot_path, **kwargs):
-    fig, axes = plt.subplots(nrows=2, ncols=1, sharex=True)
+def spans(df):
+    assert df.index.is_monotonic
+    drs = pd.date_range(df.index[0].normalize(), df.index[-1].normalize(), freq='D')
+    return zip(drs, drs + pd.DateOffset(hour=8))
 
-    # Adjust plot width by number of days shown
+
+def plot(df):
+    # FIXME: Something is up with appending...
+    df.sort_index(inplace=True)
+    fig, ax = plt.subplots(nrows=2, ncols=1, sharex=True)
     delta = (df.index[-1] - df.index[0]) / pd.Timedelta('1 Day')
     fig.set_size_inches(delta*PLOT_WIDTH_PER_DAY, PLOT_HEIGHT)
     fig.tight_layout()
+    # pd.plot_params.use('x_compat', False)
 
-    groups = df.groupby(['type'], sort=False)
-    axes = list(axes)
+    axes = list(ax)
     axes_bed = [axes[0], axes[0].twinx()]
     axes_chuck = [axes[1], axes[1].twinx()]
 
-    sensors = kwargs['sensors'] if 'sensors' in kwargs else range(10)
+    groups = df.groupby(['sid'])
 
-    pd.plot_params.use('x_compat', True)
+    # BED: strain, motion & temp
+    groups.get_group(sensors[BED]['strain']).value.resample(RESAMPLE).mean().plot(ax=axes_bed[0], style='k', label=r'$m_{strain}$')
+    axes_bed[0].eventplot(groups.get_group(sensors[BED]['motion']).value.index,
+                          linewidths=.2, colors='b', linelengths=30, lineoffsets=700)
+    ep_artist = mpl_lines.Line2D([], [], color='b', label=r'motion')
+    groups.get_group(sensors[BED]['temp']).value.resample(RESAMPLE).mean().plot(ax=axes_bed[1], style='r', label=r'$T_{bedroom}$')
 
-    # digital temp chuck
-    groups.get_group(5).value.resample('6min').plot(ax=axes_chuck[1], style='c', label="d_temp")
-    # soil
-    groups.get_group(3).value.resample('6min').plot(ax=axes_chuck[0], style='b', label="soil")
-    # light
-    groups.get_group(2).value.resample('6min').plot(ax=axes_chuck[0], style='g', label="light")
-    # a_temp
-    groups.get_group(1).value.resample('6min').plot(ax=axes_chuck[0], style='g', label="a_temp")
+    # CHUCK: soil, light, temp, ds_temp
+    groups.get_group(sensors[CHUCK]['ds_temp']).value.resample(RESAMPLE).mean().plot(ax=axes_chuck[1], style='r', label=r'$T_{desk}$')
+    groups.get_group(sensors[CHUCK]['light']).value.resample(RESAMPLE).mean().plot(ax=axes_chuck[0], style='g', label="$lum_{chuck}$")
+    groups.get_group(sensors[CHUCK]['soil']).value.resample(RESAMPLE).mean().bfill().plot(ax=axes_chuck[0], style='b', label=r"$moisture_{soil}$")
+    # groups.get_group(1).value.resample('6min').plot(ax=axes_chuck[1], style='r', label="a_temp")
 
-    date_range = axes_chuck[1].get_xlim()
+    # Legend bed
+    handles, labels = axes_bed[0].get_legend_handles_labels()
+    handles.append(ep_artist)
+    handles_r, labels_r = axes_bed[1].get_legend_handles_labels()
+    legend_r = axes_bed[1].legend(handles=handles_r, loc='upper right', shadow=True, fontsize='medium')
+    axes_bed[1].add_artist(legend_r)
+    axes_bed[1].legend(handles=handles, title='[Bed]', loc='upper left', shadow=True, fontsize='medium')
 
-    groups.get_group(7).value.resample('6min').plot(ax=axes_bed[0], style='k', label='strain')
-    groups.get_group(8).value.resample('6min').plot(ax=axes_bed[1], style='r', label='d_temp')
+    # Legend chuck
+    handles, labels = axes_chuck[0].get_legend_handles_labels()
+    handles_r, labels_r = axes_chuck[1].get_legend_handles_labels()
+    legend_r = axes_chuck[1].legend(handles=handles_r, loc='upper right', shadow=True, fontsize='medium')
+    axes_chuck[1].add_artist(legend_r)
+    axes_chuck[1].legend(handles=handles, title='[Chuck]', loc='upper left', shadow=True, fontsize='medium')
 
     # Left side
-    for a in [axes_bed[0], axes_chuck[0]]:
+    axes_chuck[0].set_ylim((0, 1023))
+    for a in [axes_chuck[0], axes_bed[0]]:
         a.set_ylabel(u'Arbitrary ADC values')
         a.set_yticks([])  # no labels on the arbitrary ADC range
-        a.set_ylim((0, 1023))
-        a.set_xlabel('')
+    axes_bed[0].set_ylim((500, 800))
+    #axes_bed[0].set_xticks([])
+    #axes_bed[1].set_xticks([])
+    #axes_chuck[0].set_xlabel('')
+
+    # shade 0-8 am
+    for span in spans(df):
+        axes_chuck[1].axvspan(span[0], span[1], facecolor='0.2', alpha=0.1)
+        axes_bed[1].axvspan(span[0], span[1], facecolor='0.2', alpha=0.1)
 
     # Right side
     for a in [axes_bed[1], axes_chuck[1]]:
-        a.legend(loc='upper right', shadow=True, fontsize='medium')
-        a.set_ylim((10, 40))
+        a.set_ylim((15, 35))
         a.set_ylabel(u'Temperature (°C)')
-        # Messing with the legend, correcting order of painting (or first legend is behind axes)
-        a.legend(loc='upper left', shadow=True, fontsize='medium')
 
-    axes_chuck[0].set_xlim(date_range)
+    axes_chuck[0].annotate('{hostname}, {timestamp}'
+                           .format(hostname=LOCAL_HOST_NAME,
+                                   timestamp=pd.Timestamp.now(),),
+                           xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -55),
+                           textcoords='offset points', ha='right', va='top')
 
-    fig.savefig(os.path.join(plot_path, 'plot.png'),
-                transparent=False, bbox_inches='tight', pad_inches=0)
+    # Save to file
+    fig.savefig(os.path.join(LOCAL_VAR_PATH, 'plot_chuck_bed.png'),
+                transparent=False, bbox_inches='tight', pad_inches=.1)
 
 
 if __name__ == "__main__":
     # TODO: Move some of the constants into command line stuff with defaults
     parser = argparse.ArgumentParser(description="Make pretty plot of telemetry data")
-    parser.add_argument('-db', help='Path to sqlite3 database file',
-                        default=os.path.join(LOCAL_DB_PATH, 'telemetry.db'))
-    parser.add_argument('-n', '--node', help='Node name (e.g. restrict to plotting "chuck"')
-    parser.add_argument('-u', '--upload', help='Upload results to web server')
+    parser.add_argument('-db', help='Path to hdf5 file.',
+                        default=os.path.join(LOCAL_DB_PATH, 'telemetry.h5'))
+    parser.add_argument('-u', '--upload', action='store_true', help='Upload results to web server')
     cli_args = parser.parse_args()
 
-    assert(os.path.exists(cli_args.db)), cli_args.db
+    assert(os.path.exists(cli_args.db))
+    data = pd.read_hdf(cli_args.db, 'data').tz_localize('UTC').tz_convert('Europe/Amsterdam')
+    plot(data)
 
-    with sqlite3.connect(cli_args.db) as con:
-        cursor = con.cursor()
-        sensors = db_io.sql_sensor_description(cursor, host=LOCAL_NODE_NAME)
-        data = db_io.sql_table2df(con, 'telemetry')
-
-    data = db_io.prepare_df(data)
-
-    # Load old bed data
-    old = pd.read_csv(os.path.join(LOCAL_DB_PATH, 'markII.csv'), names=['timestamp', 'wmin', 'wmax'])
-    old.timestamp = old.timestamp.astype('datetime64[s]')
-    old.set_index('timestamp', inplace=True)
-    old = old.tz_localize('UTC').tz_convert('Europe/Amsterdam')
-    old = pd.concat([pd.DataFrame({'type': 6, 'value': old.wmax}),
-                     pd.DataFrame({'type': 7, 'value': old.wmax})])
-
-    # Append the new bed data
-    bed = db_io.prepare_df(db_io.csv_table2df(os.path.join(LOCAL_DB_PATH, 'bed.csv')))
-    bed = pd.concat([old, bed])
-    data = pd.concat([data, bed])
-
-    make_plot(data, LOCAL_VAR_PATH)
-
-    #misc.upload_scp(LOCAL_VAR_PATH, ":".join([REMOTE_HOST, REMOTE_VAR_PATH]))
+    # if cli_args.upload:
+    #     upload_scp(os.path.join(LOCAL_VAR_PATH, 'plot_chuck_bed.png'), ":".join([REMOTE_HOST, REMOTE_VAR_PATH]))

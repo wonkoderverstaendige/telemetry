@@ -30,7 +30,7 @@ public:
     /**
      * Placeholder for analog sensor. Me stoopid.
      */
-    virtual void auxPin(uint8_t) {};
+    virtual void auxPins(uint8_t aux_pin1=0, uint8_t aux_pin=0) {};
 
     /**
      * Add new value to the buffer.

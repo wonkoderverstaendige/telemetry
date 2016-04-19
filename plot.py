@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.lines as mpl_lines
 from util.misc import get_local_config
 import matplotlib.dates as dates
+import netifaces
 
 LOCAL_CONFIG = get_local_config()
 SENSOR_HOST = LOCAL_CONFIG['host']['node']
@@ -181,8 +182,10 @@ def plot_chuck(df, axes, xlim=None):
     labels = ax.get_xticklabels()
     plt.setp(labels, rotation=0, fontsize=11)
 
-    ax_left.annotate('{hostname}, {timestamp}'
+    ip = netifaces.ifaddresses('wlan0')[netifaces.AF_INET][0]['addr']
+    ax_left.annotate('{hostname}@{ip}, {timestamp}'
                      .format(hostname=LOCAL_HOST_NAME,
+                             ip=ip,
                              timestamp=pd.Timestamp.now().strftime('%Y-%b-%d %X')),
                      xy=(1, 0), xycoords='axes fraction', fontsize=10, xytext=(0, -35),
                      textcoords='offset points', ha='right', va='top')

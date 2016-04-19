@@ -66,6 +66,9 @@ if __name__ == "__main__":
             sources[n]['iso'] = iso_date(offset=OFFSET)
 
     for src in sources:
+        if src['host'] == LOCAL_HOST_NAME:
+            print "Skipping localhost"
+            continue
         os.system("rsync -avh {host}:{src}{iso[0]:}_w{iso[1]:02}-{node}.csv {dst}".format(**src))
 
     last = last_samples_hdf(load_hdf(os.path.join(LOCAL_DB_PATH, 'telemetry.h5')))

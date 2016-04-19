@@ -6,6 +6,7 @@ import ConfigParser
 import time
 import socket
 from datetime import datetime as dt
+from datetime import timedelta
 
 
 def rev_dict(d):
@@ -52,10 +53,10 @@ def get_local_config():
 
 def timestamp():
     t = dt.now()
-    return time.mktime(t.timetuple())+(t.microsecond/1e6)
+    return time.mktime(t.timetuple()) + (t.microsecond/1e6)
 
 
-def iso_date(ts=None):
+def iso_date(ts=None, offset=0):
     """Return iso date (year, week number, day of week) of timestamp.
     If no timestamp or date was given, uses datetime.now()
 
@@ -65,8 +66,10 @@ def iso_date(ts=None):
         There are 51..53 weeks
         Starts at week 1
         :param ts: Timestamp or date. Default: None->datetime.now()
+        :param offset: Offset in hours (subtracted from timestamp)
     """
-    return dt.isocalendar(ts if ts else dt.now())
+    ts = ts if ts else dt.now()
+    return (ts - timedelta(hours=offset)).isocalendar()
 
 
 def iso_year(*args, **kwargs):

@@ -5,7 +5,7 @@ import os
 import numpy as np
 import pandas as pd
 import socket
-from util.misc import get_local_config
+from util.misc import get_local_config, iso_date, iso_week
 
 LOCAL_CONFIG = get_local_config()
 SENSOR_HOST = LOCAL_CONFIG['host']['node']
@@ -53,13 +53,24 @@ def last_samples_hdf(df):
 
 
 if __name__ == "__main__":
-    print LOCAL_DB_PATH
-    os.system("rsync -avh VersedSquid:~/code/telemetry/local/db/2016_w13-chuck.csv {}".format(LOCAL_DB_PATH))
-    os.system("rsync -avh RandyDolphin:~/code/telemetry/local/db/2016_w13-bed.csv {}".format(LOCAL_DB_PATH))
+    OFFSET = 2
+    sources = [{'host': 'VersedSquid', 'node': 'chuck', 'src': '~/code/telemetry/local/db/',
+                'iso': iso_date(), 'dst': LOCAL_DB_PATH},
+               {'host': 'RandyDolphin', 'node': 'bed', 'src': '~/code/telemetry/local/db/',
+                'iso': iso_date(), 'dst': LOCAL_DB_PATH}]
+    if iso_week(offset=0) != iso_week(offset=OFFSET):
+        import copy
+        print "Updating last weeks data, too"
+        sources.extend(copy.deepcopy(sources))
+        for n in range(len(sources) / 2):
+            sources[n]['iso'] = iso_date(offset=OFFSET)
+
+    for src in sources:
+        os.system("rsync -avh {host}:{src}{iso[0]:}_w{iso[1]:02}-{node}.csv {dst}".format(**src))
 
     last = last_samples_hdf(load_hdf(os.path.join(LOCAL_DB_PATH, 'telemetry.h5')))
-    node_data = [load_node_csv(os.path.join(LOCAL_DB_PATH, '2016_w13-chuck.csv')),
-                 load_node_csv(os.path.join(LOCAL_DB_PATH, '2016_w13-bed.csv'))]
+    node_data = [load_node_csv(os.path.join(LOCAL_DB_PATH, '{iso[0]:}_w{iso[1]:02}-{node}.csv'.format(**src)))
+                 for src in sources]
     df = pd.concat([node_data[n][node_data[n].index > last[n]] for n in range(len(node_data))]).sort_index()
 
     # FIXME: For some reason the values column is _sometimes_ cast to float64! The hell?
@@ -75,4 +86,3 @@ if __name__ == "__main__":
     except ValueError, error:
         print error
         print df.dtypes
-
